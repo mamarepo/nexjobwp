@@ -9,48 +9,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/lowongan-kerja',
-        destination: '/jobs',
-      },
-      {
-        source: '/lowongan-kerja/',
-        destination: '/jobs',
-      },
-      {
-        source: '/lowongan-kerja/:slug',
-        destination: '/jobs/:slug',
-      },
-      {
-        source: '/lowongan-kerja/:slug/',
-        destination: '/jobs/:slug',
-      },
-      {
-        source: '/artikel',
-        destination: '/articles',
-      },
-      {
-        source: '/artikel/',
-        destination: '/articles',
-      },
-      {
-        source: '/artikel/:slug',
-        destination: '/articles/:slug',
-      },
-      {
-        source: '/artikel/:slug/',
-        destination: '/articles/:slug',
-      },
-      {
-        source: '/bookmark',
-        destination: '/bookmarks',
-      },
-      {
         source: '/bookmark/',
         destination: '/bookmarks',
-      },
-      {
-        source: '/admin',
-        destination: '/admin',
       },
       {
         source: '/admin/',
@@ -58,7 +18,61 @@ const nextConfig = {
       },
     ];
   },
-  trailingSlash: false,
+  async redirects() {
+    return [
+      {
+        source: '/jobs',
+        destination: '/lowongan-kerja',
+        permanent: true,
+      },
+      {
+        source: '/jobs/',
+        destination: '/lowongan-kerja/',
+        permanent: true,
+      },
+      {
+        source: '/jobs/:slug',
+        destination: '/lowongan-kerja/:slug',
+        permanent: true,
+      },
+      {
+        source: '/jobs/:slug/',
+        destination: '/lowongan-kerja/:slug/',
+        permanent: true,
+      },
+      {
+        source: '/articles',
+        destination: '/artikel',
+        permanent: true,
+      },
+      {
+        source: '/articles/',
+        destination: '/artikel/',
+        permanent: true,
+      },
+      {
+        source: '/articles/:slug',
+        destination: '/artikel/:slug',
+        permanent: true,
+      },
+      {
+        source: '/articles/:slug/',
+        destination: '/artikel/:slug/',
+        permanent: true,
+      },
+      {
+        source: '/bookmark',
+        destination: '/bookmark/',
+        permanent: true,
+      },
+      {
+        source: '/admin',
+        destination: '/admin/',
+        permanent: true,
+      },
+    ];
+  },
+  trailingSlash: true,
   generateEtags: false,
   poweredByHeader: false,
 };

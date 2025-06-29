@@ -93,12 +93,12 @@ const HomePage: React.FC<HomePageProps> = ({ initialArticles, initialFilterData,
     if (selectedLocation) params.set('location', selectedLocation);
     
     // Navigate to jobs page
-    const url = `/jobs?${params.toString()}`;
+    const url = `/lowongan-kerja/?${params.toString()}`;
     router.push(url);
   };
 
   const handleCategoryClick = (category: string) => {
-    const url = `/jobs?category=${encodeURIComponent(category)}`;
+    const url = `/lowongan-kerja/?category=${encodeURIComponent(category)}`;
     router.push(url);
   };
 
@@ -109,7 +109,7 @@ const HomePage: React.FC<HomePageProps> = ({ initialArticles, initialFilterData,
   };
 
   const handleArticleClick = (articleSlug: string) => {
-    router.push(`/articles/${articleSlug}`);
+    router.push(`/artikel/${articleSlug}/`);
   };
 
   const getProvinceOptions = () => {
@@ -275,7 +275,7 @@ const HomePage: React.FC<HomePageProps> = ({ initialArticles, initialFilterData,
 
           <div className="text-center mt-12">
             <Link
-              href="/articles"
+              href="/artikel/"
               className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-flex items-center"
             >
               Lihat Semua Artikel

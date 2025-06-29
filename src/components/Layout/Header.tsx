@@ -67,9 +67,9 @@ const Header: React.FC = () => {
               Beranda
             </Link>
             <Link 
-              href="/jobs" 
+              href="/lowongan-kerja/" 
               className={`font-medium transition-colors ${
-                isActive('/jobs') || isActive('/lowongan-kerja')
+                isActive('/lowongan-kerja/') || isActive('/lowongan-kerja') || router.pathname.startsWith('/lowongan-kerja')
                   ? 'text-primary-600' 
                   : 'text-gray-700 hover:text-primary-600'
               }`}
@@ -77,9 +77,9 @@ const Header: React.FC = () => {
               Cari Lowongan
             </Link>
             <Link 
-              href="/articles" 
+              href="/artikel/" 
               className={`font-medium transition-colors ${
-                isActive('/articles') || isActive('/artikel')
+                isActive('/artikel/') || isActive('/artikel') || router.pathname.startsWith('/artikel')
                   ? 'text-primary-600' 
                   : 'text-gray-700 hover:text-primary-600'
               }`}
@@ -107,7 +107,7 @@ const Header: React.FC = () => {
               )}
             </Link>
             <Link
-              href="/jobs"
+              href="/lowongan-kerja/"
               className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
             >
               Cari Kerja
