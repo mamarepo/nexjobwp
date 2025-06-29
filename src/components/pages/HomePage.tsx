@@ -8,14 +8,18 @@ import SearchableSelect from '@/components/SearchableSelect';
 import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateWebsiteSchema, generateOrganizationSchema } from '@/utils/schemaUtils';
 
-const HomePage: React.FC = () => {
+interface HomePageProps {
+  initialArticles: any[];
+  initialFilterData: FilterData | null;
+  settings: any;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ initialArticles, initialFilterData, settings }) => {
   const router = useRouter();
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loadingArticles, setLoadingArticles] = useState(true);
-  const [settings, setSettings] = useState(adminService.getSettings());
-  const [filterData, setFilterData] = useState<FilterData | null>(null);
+  const [articles, setArticles] = useState<any[]>(initialArticles || []);
+  const [filterData, setFilterData] = useState<FilterData | null>(initialFilterData);
 
   const popularCategories = [
     {
@@ -83,61 +87,19 @@ const HomePage: React.FC = () => {
     }
   ];
 
-  useEffect(() => {
-    loadInitialData();
-    
-    // Update document title and meta description
-    document.title = settings.homeTitle;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', settings.homeDescription);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = settings.homeDescription;
-      document.head.appendChild(meta);
-    }
-  }, [settings]);
-
-  const loadInitialData = async () => {
-    try {
-      // Load filter data for provinces with error handling
-      try {
-        const filters = await wpService.getFiltersData();
-        setFilterData(filters);
-      } catch (error) {
-        console.warn('Failed to load filter data, using fallback:', error);
-        // Filter data will use fallback from wpService
-      }
-      
-      // Load articles with error handling
-      try {
-        const articlesData = await wpService.getArticles(3);
-        setArticles(articlesData);
-      } catch (error) {
-        console.warn('Failed to load articles, using fallback:', error);
-        // Articles will use fallback from wpService
-      }
-    } catch (error) {
-      console.error('Failed to load initial data:', error);
-    } finally {
-      setLoadingArticles(false);
-    }
-  };
-
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (searchKeyword) params.set('search', searchKeyword);
     if (selectedLocation) params.set('location', selectedLocation);
     
-    // Open in new tab
-    const url = `/jobs/?${params.toString()}`;
-    window.open(url, '_blank');
+    // Navigate to jobs page
+    const url = `/jobs?${params.toString()}`;
+    router.push(url);
   };
 
   const handleCategoryClick = (category: string) => {
-    const url = `/jobs/?category=${encodeURIComponent(category)}`;
-    window.open(url, '_blank');
+    const url = `/jobs?category=${encodeURIComponent(category)}`;
+    router.push(url);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -147,7 +109,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleArticleClick = (articleSlug: string) => {
-    router.push(`/articles/${articleSlug}/`);
+    router.push(`/articles/${articleSlug}`);
   };
 
   const getProvinceOptions = () => {
@@ -277,55 +239,43 @@ const HomePage: React.FC = () => {
             <p className="text-xl text-gray-600">Artikel terbaru untuk membantu perjalanan karir Anda</p>
           </div>
 
-          {loadingArticles ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="bg-gray-100 rounded-xl p-6 animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {articles.map((article, index) => (
-                <article
-                  key={article.id}
-                  onClick={() => handleArticleClick(article.slug)}
-                  className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  {article.featured_media_url && (
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={article.featured_media_url}
-                        alt={article.title.rendered}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors line-clamp-2">
-                      {article.title.rendered}
-                    </h3>
-                    <div
-                      className="text-gray-600 mb-4 line-clamp-3"
-                      dangerouslySetInnerHTML={{ __html: article.excerpt.rendered }}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {articles.map((article, index) => (
+              <article
+                key={article.id}
+                onClick={() => handleArticleClick(article.slug)}
+                className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                {article.featured_media_url && (
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={article.featured_media_url}
+                      alt={article.title.rendered}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="flex items-center text-primary-600 font-medium group-hover:text-primary-700">
-                      Baca Selengkapnya
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-                    </div>
                   </div>
-                </article>
-              ))}
-            </div>
-          )}
+                )}
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors line-clamp-2">
+                    {article.title.rendered}
+                  </h3>
+                  <div
+                    className="text-gray-600 mb-4 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: article.excerpt.rendered }}
+                  />
+                  <div className="flex items-center text-primary-600 font-medium group-hover:text-primary-700">
+                    Baca Selengkapnya
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
 
           <div className="text-center mt-12">
             <Link
-              href="/articles/"
+              href="/articles"
               className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-flex items-center"
             >
               Lihat Semua Artikel

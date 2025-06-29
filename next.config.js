@@ -9,24 +9,48 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/lowongan-kerja',
+        destination: '/jobs',
+      },
+      {
         source: '/lowongan-kerja/',
         destination: '/jobs',
+      },
+      {
+        source: '/lowongan-kerja/:slug',
+        destination: '/jobs/:slug',
       },
       {
         source: '/lowongan-kerja/:slug/',
         destination: '/jobs/:slug',
       },
       {
+        source: '/artikel',
+        destination: '/articles',
+      },
+      {
         source: '/artikel/',
         destination: '/articles',
+      },
+      {
+        source: '/artikel/:slug',
+        destination: '/articles/:slug',
       },
       {
         source: '/artikel/:slug/',
         destination: '/articles/:slug',
       },
       {
+        source: '/bookmark',
+        destination: '/bookmarks',
+      },
+      {
         source: '/bookmark/',
         destination: '/bookmarks',
+      },
+      {
+        source: '/admin',
+        destination: '/admin',
       },
       {
         source: '/admin/',
@@ -34,31 +58,7 @@ const nextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: '/lowongan-kerja',
-        destination: '/lowongan-kerja/',
-        permanent: true,
-      },
-      {
-        source: '/artikel',
-        destination: '/artikel/',
-        permanent: true,
-      },
-      {
-        source: '/bookmark',
-        destination: '/bookmark/',
-        permanent: true,
-      },
-      {
-        source: '/admin',
-        destination: '/admin/',
-        permanent: true,
-      },
-    ];
-  },
-  trailingSlash: true,
+  trailingSlash: false,
   generateEtags: false,
   poweredByHeader: false,
 };

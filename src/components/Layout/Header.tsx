@@ -67,9 +67,9 @@ const Header: React.FC = () => {
               Beranda
             </Link>
             <Link 
-              href="/lowongan-kerja/" 
+              href="/jobs" 
               className={`font-medium transition-colors ${
-                isActive('/lowongan-kerja/') || isActive('/jobs')
+                isActive('/jobs') || isActive('/lowongan-kerja')
                   ? 'text-primary-600' 
                   : 'text-gray-700 hover:text-primary-600'
               }`}
@@ -77,9 +77,9 @@ const Header: React.FC = () => {
               Cari Lowongan
             </Link>
             <Link 
-              href="/artikel/" 
+              href="/articles" 
               className={`font-medium transition-colors ${
-                isActive('/artikel/') || isActive('/articles')
+                isActive('/articles') || isActive('/artikel')
                   ? 'text-primary-600' 
                   : 'text-gray-700 hover:text-primary-600'
               }`}
@@ -91,9 +91,9 @@ const Header: React.FC = () => {
           {/* CTA Buttons */}
           <div className="flex items-center space-x-4">
             <Link
-              href="/bookmark/"
+              href="/bookmarks"
               className={`relative p-2 rounded-lg transition-colors ${
-                isActive('/bookmark/') || isActive('/bookmarks')
+                isActive('/bookmarks') || isActive('/bookmark')
                   ? 'text-primary-600 bg-primary-50'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
               }`}
@@ -107,7 +107,7 @@ const Header: React.FC = () => {
               )}
             </Link>
             <Link
-              href="/lowongan-kerja/"
+              href="/jobs"
               className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
             >
               Cari Kerja
