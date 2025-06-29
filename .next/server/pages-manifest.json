@@ -3,7 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/artikel": "pages/artikel.js",
   "/artikel/[slug]": "pages/artikel/[slug].js",
-  "/lowongan-kerja": "pages/lowongan-kerja.js"
+  "/lowongan-kerja": "pages/lowongan-kerja.js",
+  "/lowongan-kerja/[slug]": "pages/lowongan-kerja/[slug].js"
 }
