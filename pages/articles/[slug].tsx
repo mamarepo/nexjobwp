@@ -1,6 +1,7 @@
 import { GetStaticProps, GetStaticPaths } from 'next';
 import Head from 'next/head';
-import { wpService } from '@/services/wpService';
+import { WordPressService } from '@/services/wpService';
+import { adminService } from '@/services/adminService';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import ArticleDetailPage from '@/components/pages/ArticleDetailPage';
@@ -78,14 +79,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       return { notFound: true };
     }
 
-    const article = await wpService.getArticleBySlug(slug);
+    const settings = adminService.getSettings();
+    
+    // Create isolated wpService instance for this request
+    const currentWpService = new WordPressService();
+    currentWpService.setBaseUrl(settings.apiUrl);
+    currentWpService.setFiltersApiUrl(settings.filtersApiUrl);
+    currentWpService.setAuthToken(settings.authToken);
+
+    const article = await currentWpService.getArticleBySlug(slug);
     
     if (!article) {
       return { notFound: true };
     }
 
     // Get related articles
-    const relatedArticles = await wpService.getRelatedArticles(article.id.toString(), 3);
+    const relatedArticles = await currentWpService.getRelatedArticles(article.id.toString(), 3);
 
     return {
       props: {
@@ -102,8 +111,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
+    const settings = adminService.getSettings();
+    
+    // Create isolated wpService instance for this request
+    const currentWpService = new WordPressService();
+    currentWpService.setBaseUrl(settings.apiUrl);
+    currentWpService.setFiltersApiUrl(settings.filtersApiUrl);
+    currentWpService.setAuthToken(settings.authToken);
+    
     // Get recent articles for initial static generation
-    const articles = await wpService.getArticles(20);
+    const articles = await currentWpService.getArticles(20);
     
     const paths = articles.map((article) => ({
       params: { slug: article.slug }

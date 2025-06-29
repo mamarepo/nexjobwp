@@ -1,7 +1,8 @@
 import { GetStaticProps, GetStaticPaths } from 'next';
 import Head from 'next/head';
 import { Job } from '@/types/job';
-import { wpService } from '@/services/wpService';
+import { WordPressService } from '@/services/wpService';
+import { adminService } from '@/services/adminService';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import JobDetailPage from '@/components/pages/JobDetailPage';
@@ -65,14 +66,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       return { notFound: true };
     }
 
-    const job = await wpService.getJobBySlug(slug);
+    const settings = adminService.getSettings();
+    
+    // Create isolated wpService instance for this request
+    const currentWpService = new WordPressService();
+    currentWpService.setBaseUrl(settings.apiUrl);
+    currentWpService.setFiltersApiUrl(settings.filtersApiUrl);
+    currentWpService.setAuthToken(settings.authToken);
+
+    const job = await currentWpService.getJobBySlug(slug);
     
     if (!job) {
       return { notFound: true };
     }
 
     // Get related jobs
-    const relatedJobs = await wpService.getRelatedJobs(job.id, job.kategori_pekerjaan, 4);
+    const relatedJobs = await currentWpService.getRelatedJobs(job.id, job.kategori_pekerjaan, 4);
 
     return {
       props: {
@@ -89,8 +98,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
+    const settings = adminService.getSettings();
+    
+    // Create isolated wpService instance for this request
+    const currentWpService = new WordPressService();
+    currentWpService.setBaseUrl(settings.apiUrl);
+    currentWpService.setFiltersApiUrl(settings.filtersApiUrl);
+    currentWpService.setAuthToken(settings.authToken);
+    
     // Get recent jobs for initial static generation
-    const jobsResponse = await wpService.getJobs({}, 1, 50);
+    const jobsResponse = await currentWpService.getJobs({}, 1, 50);
     
     const paths = jobsResponse.jobs.map((job) => ({
       params: { slug: job.slug }

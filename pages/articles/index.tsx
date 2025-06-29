@@ -1,6 +1,6 @@
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import { wpService } from '@/services/wpService';
+import { WordPressService } from '@/services/wpService';
 import { adminService } from '@/services/adminService';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
@@ -47,12 +47,13 @@ export const getStaticProps: GetStaticProps = async () => {
   try {
     const settings = adminService.getSettings();
     
-    // Initialize wpService with settings
-    wpService.setBaseUrl(settings.apiUrl);
-    wpService.setFiltersApiUrl(settings.filtersApiUrl);
-    wpService.setAuthToken(settings.authToken);
+    // Create isolated wpService instance for this request
+    const currentWpService = new WordPressService();
+    currentWpService.setBaseUrl(settings.apiUrl);
+    currentWpService.setFiltersApiUrl(settings.filtersApiUrl);
+    currentWpService.setAuthToken(settings.authToken);
     
-    const articles = await wpService.getArticles();
+    const articles = await currentWpService.getArticles();
 
     return {
       props: {

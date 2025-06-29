@@ -28,15 +28,6 @@ class AdminService {
       const savedSettings = settings ? JSON.parse(settings) : {};
       const mergedSettings = { ...this.defaultSettings, ...savedSettings };
       
-      // Apply settings to wpService when loaded
-      if (typeof window !== 'undefined') {
-        import('@/services/wpService').then(({ wpService }) => {
-          wpService.setBaseUrl(mergedSettings.apiUrl);
-          wpService.setFiltersApiUrl(mergedSettings.filtersApiUrl);
-          wpService.setAuthToken(mergedSettings.authToken);
-        });
-      }
-      
       return mergedSettings;
     } catch (error) {
       console.error('Error getting admin settings:', error);
@@ -49,15 +40,6 @@ class AdminService {
       if (typeof window === 'undefined') return;
       
       localStorage.setItem(this.storageKey, JSON.stringify(settings));
-      
-      // Apply settings to wpService immediately
-      if (typeof window !== 'undefined') {
-        import('@/services/wpService').then(({ wpService }) => {
-          wpService.setBaseUrl(settings.apiUrl);
-          wpService.setFiltersApiUrl(settings.filtersApiUrl);
-          wpService.setAuthToken(settings.authToken);
-        });
-      }
     } catch (error) {
       console.error('Error saving admin settings:', error);
     }
