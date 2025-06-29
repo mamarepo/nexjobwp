@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Filter, X, Loader2, AlertCircle } from 'lucide-react';
-import { Job } from '@/../types/job';
-import { wpService, FilterData, JobsResponse } from '@/../services/wpService';
-import { adminService } from '@/../services/adminService';
-import JobCard from '@/../components/JobCard';
-import JobSidebar from '@/../components/JobSidebar';
-import SearchableSelect from '@/../components/SearchableSelect';
-import SchemaMarkup from '@/../components/SEO/SchemaMarkup';
-import { generateJobListingSchema, generateBreadcrumbSchema } from '@/../utils/schemaUtils';
-import { useInfiniteScroll } from '@/../hooks/useInfiniteScroll';
+import { Job } from '@/types/job';
+import { wpService, FilterData, JobsResponse } from '@/services/wpService';
+import { adminService } from '@/services/adminService';
+import JobCard from '@/components/JobCard';
+import JobSidebar from '@/components/JobSidebar';
+import SearchableSelect from '@/components/SearchableSelect';
+import SchemaMarkup from '@/components/SEO/SchemaMarkup';
+import { generateJobListingSchema, generateBreadcrumbSchema } from '@/utils/schemaUtils';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 const JobSearchPage: React.FC = () => {
   const navigate = useNavigate();

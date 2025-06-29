@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, TestTube, Save, LogOut, Eye, EyeOff, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { adminService } from '@/../services/adminService';
-import { wpService } from '@/../services/wpService';
-import { AdminSettings } from '@/../types/job';
+import { adminService } from '@/services/adminService';
+import { wpService } from '@/services/wpService';
+import { AdminSettings } from '@/types/job';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();

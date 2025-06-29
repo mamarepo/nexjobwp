@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Loader2 } from 'lucide-react';
-import { wpService } from '@/../services/wpService';
-import { adminService } from '@/../services/adminService';
-import Breadcrumbs from '@/../components/Breadcrumbs';
-import SchemaMarkup from '@/../components/SEO/SchemaMarkup';
-import { generateArticleListingSchema, generateBreadcrumbSchema } from '@/../utils/schemaUtils';
+import { wpService } from '@/services/wpService';
+import { adminService } from '@/services/adminService';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import SchemaMarkup from '@/components/SEO/SchemaMarkup';
+import { generateArticleListingSchema, generateBreadcrumbSchema } from '@/utils/schemaUtils';
 
 const ArticlePage: React.FC = () => {
   const [articles, setArticles] = useState<any[]>([]);

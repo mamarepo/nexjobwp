@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bookmark, AlertCircle, Loader2 } from 'lucide-react';
-import { Job } from '@/../types/job';
-import { wpService } from '@/../services/wpService';
-import { bookmarkService } from '@/../services/bookmarkService';
-import JobCard from '@/../components/JobCard';
-import Breadcrumbs from '@/../components/Breadcrumbs';
-import SchemaMarkup from '@/../components/SEO/SchemaMarkup';
-import { generateBreadcrumbSchema } from '@/../utils/schemaUtils';
+import { Job } from '@/types/job';
+import { wpService } from '@/services/wpService';
+import { bookmarkService } from '@/services/bookmarkService';
+import JobCard from '@/components/JobCard';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import SchemaMarkup from '@/components/SEO/SchemaMarkup';
+import { generateBreadcrumbSchema } from '@/utils/schemaUtils';
 
 const BookmarkPage: React.FC = () => {
   const [bookmarkedJobs, setBookmarkedJobs] = useState<Job[]>([]);
