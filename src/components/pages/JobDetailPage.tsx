@@ -24,53 +24,19 @@ import JobCard from '@/components/JobCard';
 import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateJobPostingSchema, generateBreadcrumbSchema } from '@/utils/schemaUtils';
 
-const JobDetailPage: React.FC = () => {
+interface JobDetailPageProps {
+  job: Job;
+  relatedJobs: Job[];
+}
+
+const JobDetailPage: React.FC<JobDetailPageProps> = ({ job, relatedJobs }) => {
   const router = useRouter();
-  const { slug } = router.query;
-  const [job, setJob] = useState<Job | null>(null);
-  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
-    const loadJob = async () => {
-      if (!slug || typeof slug !== 'string') return;
-      
-      try {
-        const jobData = await wpService.getJobBySlug(slug);
-        if (jobData) {
-          setJob(jobData);
-          setIsBookmarked(bookmarkService.isBookmarked(jobData.id));
-          
-          // Update document title and meta description
-          document.title = jobData.seo_title || `${jobData.title} - ${jobData.company_name}`;
-          const metaDescription = document.querySelector('meta[name="description"]');
-          const description = jobData.seo_description || `Lowongan ${jobData.title} di ${jobData.company_name}, ${jobData.lokasi_kota}. Gaji: ${jobData.gaji}. Lamar sekarang!`;
-          if (metaDescription) {
-            metaDescription.setAttribute('content', description);
-          } else {
-            const meta = document.createElement('meta');
-            meta.name = 'description';
-            meta.content = description;
-            document.head.appendChild(meta);
-          }
-          
-          // Load related jobs
-          const related = await wpService.getRelatedJobs(jobData.id, jobData.kategori_pekerjaan);
-          setRelatedJobs(related);
-        } else {
-          setError('Lowongan pekerjaan tidak ditemukan');
-        }
-      } catch (err) {
-        setError('Gagal memuat detail pekerjaan');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadJob();
-  }, [slug]);
+    if (!job) return;
+    setIsBookmarked(bookmarkService.isBookmarked(job.id));
+  }, [job]);
 
   // Listen for bookmark changes
   useEffect(() => {
@@ -103,7 +69,7 @@ const JobDetailPage: React.FC = () => {
   };
 
   const handleRelatedJobClick = (relatedJob: Job) => {
-    window.open(`/jobs/${relatedJob.slug}/`, '_blank');
+    window.open(`/lowongan-kerja/${relatedJob.slug}/`, '_blank');
   };
 
   const formatDate = (dateStr?: string) => {
@@ -141,18 +107,7 @@ const JobDetailPage: React.FC = () => {
     return tagString.split(', ').map(tag => tag.trim()).filter(tag => tag.length > 0);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat detail pekerjaan...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !job) {
+  if (!job) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -160,9 +115,9 @@ const JobDetailPage: React.FC = () => {
             <ExternalLink className="h-12 w-12 text-gray-400" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Lowongan Tidak Ditemukan</h2>
-          <p className="text-gray-600 mb-6">{error || 'Lowongan yang Anda cari tidak tersedia'}</p>
+          <p className="text-gray-600 mb-6">Lowongan yang Anda cari tidak tersedia</p>
           <Link 
-            href="/jobs/"
+            href="/lowongan-kerja/"
             className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -174,7 +129,7 @@ const JobDetailPage: React.FC = () => {
   }
 
   const breadcrumbItems = [
-    { label: 'Lowongan Kerja', href: '/jobs/' },
+    { label: 'Lowongan Kerja', href: '/lowongan-kerja/' },
     { label: job.title }
   ];
 

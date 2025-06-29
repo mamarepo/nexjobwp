@@ -11,22 +11,35 @@ import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateJobListingSchema, generateBreadcrumbSchema } from '@/utils/schemaUtils';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
-const JobSearchPage: React.FC = () => {
+interface JobSearchPageProps {
+  initialJobs: Job[];
+  initialFilterData: FilterData | null;
+  initialSearchParams: any;
+  initialTotalJobs: number;
+  settings: any;
+}
+
+const JobSearchPage: React.FC<JobSearchPageProps> = ({ 
+  initialJobs, 
+  initialFilterData, 
+  initialSearchParams, 
+  initialTotalJobs, 
+  settings 
+}) => {
   const router = useRouter();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs || []);
+  const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterData, setFilterData] = useState<FilterData | null>(null);
-  const [settings] = useState(adminService.getSettings());
+  const [filterData, setFilterData] = useState<FilterData | null>(initialFilterData);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [totalJobs, setTotalJobs] = useState(0);
+  const [totalJobs, setTotalJobs] = useState(initialTotalJobs || 0);
   
   // Main search filters
-  const [keyword, setKeyword] = useState((router.query.search as string) || '');
-  const [selectedProvince, setSelectedProvince] = useState((router.query.location as string) || '');
+  const [keyword, setKeyword] = useState(initialSearchParams?.search || '');
+  const [selectedProvince, setSelectedProvince] = useState(initialSearchParams?.location || '');
   
   // Sidebar filters - now using arrays for multiple selections
   const [sidebarFilters, setSidebarFilters] = useState({
@@ -36,7 +49,7 @@ const JobSearchPage: React.FC = () => {
     educations: [] as string[],
     industries: [] as string[],
     workPolicies: [] as string[],
-    categories: [] as string[]
+    categories: initialSearchParams?.category ? [initialSearchParams.category] : [] as string[]
   });
 
   // Sort filter
@@ -95,22 +108,6 @@ const JobSearchPage: React.FC = () => {
     }
   }, [loadingMore, isFetching, resetFetching]);
 
-  useEffect(() => {
-    loadInitialData();
-    
-    // Update document title and meta description
-    document.title = settings.jobsTitle;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', settings.jobsDescription);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = settings.jobsDescription;
-      document.head.appendChild(meta);
-    }
-  }, [settings]);
-
   // Watch for changes in filters to trigger search
   useEffect(() => {
     const currentFilters = {
@@ -133,51 +130,6 @@ const JobSearchPage: React.FC = () => {
     }
   }, [keyword, selectedProvince, sidebarFilters, sortBy, filterData]);
 
-  const loadInitialData = async () => {
-    try {
-      setError(null);
-      
-      // Load filter data first
-      const filters = await wpService.getFiltersData();
-      setFilterData(filters);
-      
-      // Parse URL parameters for initial filters
-      const urlCategories = router.query.category as string;
-      if (urlCategories) {
-        setSidebarFilters(prev => ({
-          ...prev,
-          categories: [urlCategories]
-        }));
-      }
-      
-      // Load initial jobs
-      const initialFilters = {
-        search: keyword,
-        location: selectedProvince,
-        categories: urlCategories ? [urlCategories] : [],
-        sortBy: sortBy
-      };
-      
-      const response = await wpService.getJobs(initialFilters, 1, 24);
-      setJobs(response.jobs);
-      setCurrentPage(response.currentPage);
-      setHasMore(response.hasMore);
-      setTotalJobs(response.totalJobs);
-      
-      // Update filters ref
-      filtersRef.current = {
-        keyword,
-        selectedProvince,
-        sidebarFilters: urlCategories ? { ...sidebarFilters, categories: [urlCategories] } : sidebarFilters,
-        sortBy
-      };
-    } catch (err) {
-      setError('Gagal memuat data pekerjaan. Silakan coba lagi.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleFilterSearch = async () => {
     if (searching) return;
     
@@ -199,7 +151,7 @@ const JobSearchPage: React.FC = () => {
       const params = new URLSearchParams();
       if (keyword) params.set('search', keyword);
       if (selectedProvince) params.set('location', selectedProvince);
-      router.replace(`/jobs/?${params.toString()}`, undefined, { shallow: true });
+      router.replace(`/lowongan-kerja/?${params.toString()}`, undefined, { shallow: true });
       
       const response = await wpService.getJobs(filters, 1, 24);
       setJobs(response.jobs);
@@ -226,7 +178,7 @@ const JobSearchPage: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    window.open(`/jobs/${job.slug}/`, '_blank');
+    window.open(`/lowongan-kerja/${job.slug}/`, '_blank');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -248,7 +200,7 @@ const JobSearchPage: React.FC = () => {
       categories: []
     });
     setSortBy('newest');
-    router.replace('/jobs/', undefined, { shallow: true });
+    router.replace('/lowongan-kerja/', undefined, { shallow: true });
   };
 
   const getActiveFiltersCount = () => {
@@ -287,17 +239,6 @@ const JobSearchPage: React.FC = () => {
   const breadcrumbItems = [
     { label: 'Lowongan Kerja' }
   ];
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Memuat lowongan pekerjaan...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

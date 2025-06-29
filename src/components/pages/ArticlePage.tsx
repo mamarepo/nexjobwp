@@ -7,39 +7,12 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateArticleListingSchema, generateBreadcrumbSchema } from '@/utils/schemaUtils';
 
-const ArticlePage: React.FC = () => {
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [settings] = useState(adminService.getSettings());
+interface ArticlePageProps {
+  articles: any[];
+  settings: any;
+}
 
-  useEffect(() => {
-    loadArticles();
-    
-    // Update document title and meta description
-    document.title = settings.articlesTitle;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', settings.articlesDescription);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = settings.articlesDescription;
-      document.head.appendChild(meta);
-    }
-  }, [settings]);
-
-  const loadArticles = async () => {
-    try {
-      const articlesData = await wpService.getArticles();
-      setArticles(articlesData);
-    } catch (err) {
-      setError('Gagal memuat artikel. Silakan coba lagi.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const ArticlePage: React.FC<ArticlePageProps> = ({ articles, settings }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', {
@@ -52,17 +25,6 @@ const ArticlePage: React.FC = () => {
   const breadcrumbItems = [
     { label: 'Tips Karir' }
   ];
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Memuat artikel...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -89,22 +51,12 @@ const ArticlePage: React.FC = () => {
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbItems} />
 
-        {error ? (
-          <div className="text-center py-16">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={loadArticles}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Coba Lagi
-            </button>
-          </div>
-        ) : articles.length > 0 ? (
+        {articles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {articles.map((article, index) => (
               <Link
                 key={article.id}
-                href={`/articles/${article.slug}/`}
+                href={`/artikel/${article.slug}/`}
                 className="group"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >

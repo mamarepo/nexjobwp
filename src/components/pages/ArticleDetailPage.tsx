@@ -7,50 +7,13 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateArticleSchema, generateBreadcrumbSchema, generateAuthorSchema } from '@/utils/schemaUtils';
 
-const ArticleDetailPage: React.FC = () => {
+interface ArticleDetailPageProps {
+  article: any;
+  relatedArticles: any[];
+}
+
+const ArticleDetailPage: React.FC<ArticleDetailPageProps> = ({ article, relatedArticles }) => {
   const router = useRouter();
-  const { slug } = router.query;
-  const [article, setArticle] = useState<any>(null);
-  const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadArticle = async () => {
-      if (!slug || typeof slug !== 'string') return;
-      
-      try {
-        const articleData = await wpService.getArticleBySlug(slug);
-        if (articleData) {
-          setArticle(articleData);
-          
-          // Update document title and meta description
-          document.title = articleData.seo_title || articleData.title.rendered;
-          const metaDescription = document.querySelector('meta[name="description"]');
-          if (metaDescription) {
-            metaDescription.setAttribute('content', articleData.seo_description);
-          } else {
-            const meta = document.createElement('meta');
-            meta.name = 'description';
-            meta.content = articleData.seo_description;
-            document.head.appendChild(meta);
-          }
-          
-          // Load related articles
-          const related = await wpService.getRelatedArticles(articleData.id.toString());
-          setRelatedArticles(related);
-        } else {
-          setError('Artikel tidak ditemukan');
-        }
-      } catch (err) {
-        setError('Gagal memuat artikel');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadArticle();
-  }, [slug]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -72,21 +35,10 @@ const ArticleDetailPage: React.FC = () => {
   };
 
   const handleRelatedArticleClick = (articleSlug: string) => {
-    router.push(`/articles/${articleSlug}/`);
+    router.push(`/artikel/${articleSlug}/`);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Memuat artikel...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !article) {
+  if (!article) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -94,9 +46,9 @@ const ArticleDetailPage: React.FC = () => {
             <AlertCircle className="h-12 w-12 text-gray-400" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Artikel Tidak Ditemukan</h2>
-          <p className="text-gray-600 mb-6">{error || 'Artikel yang Anda cari tidak tersedia'}</p>
+          <p className="text-gray-600 mb-6">Artikel yang Anda cari tidak tersedia</p>
           <Link 
-            href="/articles/"
+            href="/artikel/"
             className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
           >
             Kembali ke Artikel
@@ -107,7 +59,7 @@ const ArticleDetailPage: React.FC = () => {
   }
 
   const breadcrumbItems = [
-    { label: 'Tips Karir', href: '/articles/' },
+    { label: 'Tips Karir', href: '/artikel/' },
     { label: article.title.rendered }
   ];
 
