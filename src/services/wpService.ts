@@ -10,6 +10,14 @@ interface FilterData {
   nexjob_industri: string[];
 }
 
+interface JobsResponse {
+  jobs: Job[];
+  totalPages: number;
+  currentPage: number;
+  totalJobs: number;
+  hasMore: boolean;
+}
+
 class WordPressService {
   private baseUrl = 'https://staging.nexjob.tech/wp-json/wp/v2';
   private filtersApiUrl = 'https://staging.nexjob.tech/wp-json/nex/v1/filters-data';
@@ -43,6 +51,26 @@ class WordPressService {
     const textarea = document.createElement('textarea');
     textarea.innerHTML = text;
     return textarea.value;
+  }
+
+  private stripHtmlTags(html: string): string {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  }
+
+  private getPreferredDescription(excerptRendered: string, rankMathDescription: string): string {
+    // First try rank_math_description if it exists and is not empty
+    if (rankMathDescription && rankMathDescription.trim() !== '') {
+      return this.stripHtmlTags(this.decodeHtmlEntities(rankMathDescription));
+    }
+    
+    // Fall back to excerpt if available
+    if (excerptRendered && excerptRendered.trim() !== '') {
+      return this.stripHtmlTags(this.decodeHtmlEntities(excerptRendered));
+    }
+    
+    return '';
   }
 
   async getFiltersData(): Promise<FilterData> {
@@ -204,9 +232,9 @@ class WordPressService {
     }
   }
 
-  async getJobs(filters?: any): Promise<Job[]> {
+  async getJobs(filters?: any, page: number = 1, perPage: number = 24): Promise<JobsResponse> {
     try {
-      let url = `${this.baseUrl}/lowongan-kerja?per_page=100&_embed`;
+      let url = `${this.baseUrl}/lowongan-kerja?per_page=${perPage}&page=${page}&_embed`;
       
       // Add search parameter if provided
       if (filters?.search) {
@@ -222,6 +250,10 @@ class WordPressService {
       }
 
       const wpJobs = await response.json();
+      
+      // Get total pages from headers
+      const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1');
+      const totalJobs = parseInt(response.headers.get('X-WP-Total') || '0');
       
       // Transform WordPress data to our Job interface
       let jobs: Job[] = wpJobs.map((wpJob: any) => {
@@ -249,7 +281,7 @@ class WordPressService {
           sumber_lowongan: this.decodeHtmlEntities(meta.nexjob_sumber_loker || 'Nexjob'),
           created_at: wpJob.date,
           seo_title: this.decodeHtmlEntities(meta.rank_math_title || wpJob.title.rendered),
-          seo_description: this.decodeHtmlEntities(meta.rank_math_description || ''),
+          seo_description: this.getPreferredDescription(wpJob.excerpt?.rendered || '', meta.rank_math_description || ''),
           _id: { $oid: wpJob.id.toString() },
           id_obj: { $numberInt: wpJob.id.toString() }
         };
@@ -267,12 +299,31 @@ class WordPressService {
         });
       }
 
-      return jobs;
+      return {
+        jobs,
+        totalPages,
+        currentPage: page,
+        totalJobs,
+        hasMore: page < totalPages
+      };
     } catch (error) {
       console.error('Error fetching jobs:', error);
       // Return mock data as fallback
-      return this.getMockJobs(filters);
+      const mockJobs = this.getMockJobs(filters);
+      return {
+        jobs: mockJobs,
+        totalPages: 1,
+        currentPage: 1,
+        totalJobs: mockJobs.length,
+        hasMore: false
+      };
     }
+  }
+
+  // Legacy method for backward compatibility
+  async getAllJobs(filters?: any): Promise<Job[]> {
+    const response = await this.getJobs(filters, 1, 100);
+    return response.jobs;
   }
 
   async getJobBySlug(slug: string): Promise<Job | null> {
@@ -314,7 +365,7 @@ class WordPressService {
         sumber_lowongan: this.decodeHtmlEntities(meta.nexjob_sumber_loker || 'Nexjob'),
         created_at: wpJob.date,
         seo_title: this.decodeHtmlEntities(meta.rank_math_title || wpJob.title.rendered),
-        seo_description: this.decodeHtmlEntities(meta.rank_math_description || ''),
+        seo_description: this.getPreferredDescription(wpJob.excerpt?.rendered || '', meta.rank_math_description || ''),
         _id: { $oid: wpJob.id.toString() },
         id_obj: { $numberInt: wpJob.id.toString() }
       };
@@ -358,7 +409,7 @@ class WordPressService {
         sumber_lowongan: this.decodeHtmlEntities(meta.nexjob_sumber_loker || 'Nexjob'),
         created_at: wpJob.date,
         seo_title: this.decodeHtmlEntities(meta.rank_math_title || wpJob.title.rendered),
-        seo_description: this.decodeHtmlEntities(meta.rank_math_description || ''),
+        seo_description: this.getPreferredDescription(wpJob.excerpt?.rendered || '', meta.rank_math_description || ''),
         _id: { $oid: wpJob.id.toString() },
         id_obj: { $numberInt: wpJob.id.toString() }
       };
@@ -370,7 +421,7 @@ class WordPressService {
 
   async getRelatedJobs(currentJobId: string, category: string, limit: number = 4): Promise<Job[]> {
     try {
-      const allJobs = await this.getJobs();
+      const allJobs = await this.getAllJobs();
       return allJobs
         .filter(job => job.id !== currentJobId && job.kategori_pekerjaan.toLowerCase().includes(category.toLowerCase()))
         .slice(0, limit);
@@ -419,7 +470,7 @@ class WordPressService {
           name: this.decodeHtmlEntities(tag.name)
         })) || [],
         seo_title: this.decodeHtmlEntities(article.meta?.rank_math_title || article.title.rendered),
-        seo_description: this.decodeHtmlEntities(article.meta?.rank_math_description || article.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160))
+        seo_description: this.getPreferredDescription(article.excerpt?.rendered || '', article.meta?.rank_math_description || '')
       }));
     } catch (error) {
       console.error('Error fetching articles:', error);
@@ -464,7 +515,7 @@ class WordPressService {
           name: this.decodeHtmlEntities(tag.name)
         })) || [],
         seo_title: this.decodeHtmlEntities(article.meta?.rank_math_title || article.title.rendered),
-        seo_description: this.decodeHtmlEntities(article.meta?.rank_math_description || article.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160))
+        seo_description: this.getPreferredDescription(article.excerpt?.rendered || '', article.meta?.rank_math_description || '')
       };
     } catch (error) {
       console.error('Error fetching article:', error);
@@ -504,7 +555,7 @@ class WordPressService {
           name: this.decodeHtmlEntities(tag.name)
         })) || [],
         seo_title: this.decodeHtmlEntities(article.meta?.rank_math_title || article.title.rendered),
-        seo_description: this.decodeHtmlEntities(article.meta?.rank_math_description || article.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160))
+        seo_description: this.getPreferredDescription(article.excerpt?.rendered || '', article.meta?.rank_math_description || '')
       };
     } catch (error) {
       console.error('Error fetching article:', error);
@@ -650,4 +701,4 @@ class WordPressService {
 }
 
 export const wpService = new WordPressService();
-export type { FilterData };
+export type { FilterData, JobsResponse };

@@ -20,6 +20,8 @@ import { wpService } from '../services/wpService';
 import { bookmarkService } from '../services/bookmarkService';
 import Breadcrumbs from '../components/Breadcrumbs';
 import JobCard from '../components/JobCard';
+import SchemaMarkup from '../components/SEO/SchemaMarkup';
+import { generateJobPostingSchema, generateBreadcrumbSchema } from '../utils/schemaUtils';
 
 const JobDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -99,7 +101,7 @@ const JobDetailPage: React.FC = () => {
   };
 
   const handleRelatedJobClick = (relatedJob: Job) => {
-    window.open(`/job/${relatedJob.slug}`, '_blank');
+    window.open(`/lowongan-kerja/${relatedJob.slug}/`, '_blank');
   };
 
   const formatDate = (dateStr?: string) => {
@@ -158,7 +160,7 @@ const JobDetailPage: React.FC = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Lowongan Tidak Ditemukan</h2>
           <p className="text-gray-600 mb-6">{error || 'Lowongan yang Anda cari tidak tersedia'}</p>
           <Link 
-            to="/lowongan-kerja"
+            to="/lowongan-kerja/"
             className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -170,12 +172,16 @@ const JobDetailPage: React.FC = () => {
   }
 
   const breadcrumbItems = [
-    { label: 'Lowongan Kerja', href: '/lowongan-kerja' },
+    { label: 'Lowongan Kerja', href: '/lowongan-kerja/' },
     { label: job.title }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Schema Markup */}
+      <SchemaMarkup schema={generateJobPostingSchema(job)} />
+      <SchemaMarkup schema={generateBreadcrumbSchema(breadcrumbItems)} />
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbItems} />

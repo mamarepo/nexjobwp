@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Filter, X, Loader2, AlertCircle } from 'lucide-react';
 import { Job } from '../types/job';
-import { wpService, FilterData } from '../services/wpService';
+import { wpService, FilterData, JobsResponse } from '../services/wpService';
 import { adminService } from '../services/adminService';
 import JobCard from '../components/JobCard';
 import JobSidebar from '../components/JobSidebar';
 import SearchableSelect from '../components/SearchableSelect';
+import SchemaMarkup from '../components/SEO/SchemaMarkup';
+import { generateJobListingSchema, generateBreadcrumbSchema } from '../utils/schemaUtils';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
 const JobSearchPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,9 +17,13 @@ const JobSearchPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filterData, setFilterData] = useState<FilterData | null>(null);
   const [settings] = useState(adminService.getSettings());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalJobs, setTotalJobs] = useState(0);
   
   // Main search filters
   const [keyword, setKeyword] = useState(searchParams.get('search') || '');
@@ -38,6 +45,57 @@ const JobSearchPage: React.FC = () => {
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  // Ref for tracking if filters have changed
+  const filtersRef = useRef({
+    keyword: '',
+    selectedProvince: '',
+    sidebarFilters: sidebarFilters,
+    sortBy: 'newest'
+  });
+
+  // Load more jobs function for infinite scroll
+  const loadMoreJobs = useCallback(async () => {
+    if (loadingMore || !hasMore || searching) return;
+
+    setLoadingMore(true);
+    try {
+      const filters = {
+        search: keyword,
+        location: selectedProvince,
+        sortBy: sortBy,
+        ...sidebarFilters
+      };
+
+      const response = await wpService.getJobs(filters, currentPage + 1, 24);
+      
+      if (response.jobs.length > 0) {
+        setJobs(prevJobs => [...prevJobs, ...response.jobs]);
+        setCurrentPage(response.currentPage);
+        setHasMore(response.hasMore);
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error('Error loading more jobs:', err);
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [keyword, selectedProvince, sortBy, sidebarFilters, currentPage, hasMore, loadingMore, searching]);
+
+  // Infinite scroll hook
+  const { isFetching, setTarget, resetFetching } = useInfiniteScroll(loadMoreJobs, {
+    threshold: 0.8,
+    rootMargin: '200px'
+  });
+
+  // Reset fetching state when loading more is complete
+  useEffect(() => {
+    if (!loadingMore && isFetching) {
+      resetFetching();
+    }
+  }, [loadingMore, isFetching, resetFetching]);
+
   useEffect(() => {
     loadInitialData();
     
@@ -54,24 +112,27 @@ const JobSearchPage: React.FC = () => {
     }
   }, [settings]);
 
-  // Watch for changes in keyword and selectedProvince to trigger auto-search
+  // Watch for changes in filters to trigger search
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (keyword !== (searchParams.get('search') || '') || 
-          selectedProvince !== (searchParams.get('location') || '')) {
-        handleAutoSearch();
-      }
-    }, 500); // Debounce for 500ms
+    const currentFilters = {
+      keyword,
+      selectedProvince,
+      sidebarFilters,
+      sortBy
+    };
 
-    return () => clearTimeout(timeoutId);
-  }, [keyword, selectedProvince]);
+    // Check if filters have actually changed
+    const filtersChanged = 
+      currentFilters.keyword !== filtersRef.current.keyword ||
+      currentFilters.selectedProvince !== filtersRef.current.selectedProvince ||
+      currentFilters.sortBy !== filtersRef.current.sortBy ||
+      JSON.stringify(currentFilters.sidebarFilters) !== JSON.stringify(filtersRef.current.sidebarFilters);
 
-  // Watch for sidebar filter changes to trigger immediate search
-  useEffect(() => {
-    if (filterData) { // Only trigger after initial load
+    if (filtersChanged && filterData) {
+      filtersRef.current = currentFilters;
       handleFilterSearch();
     }
-  }, [sidebarFilters, sortBy]);
+  }, [keyword, selectedProvince, sidebarFilters, sortBy, filterData]);
 
   const loadInitialData = async () => {
     try {
@@ -90,7 +151,7 @@ const JobSearchPage: React.FC = () => {
         }));
       }
       
-      // Load jobs with initial filters
+      // Load initial jobs
       const initialFilters = {
         search: keyword,
         location: selectedProvince,
@@ -98,8 +159,19 @@ const JobSearchPage: React.FC = () => {
         sortBy: sortBy
       };
       
-      const jobsData = await wpService.getJobs(initialFilters);
-      setJobs(jobsData);
+      const response = await wpService.getJobs(initialFilters, 1, 24);
+      setJobs(response.jobs);
+      setCurrentPage(response.currentPage);
+      setHasMore(response.hasMore);
+      setTotalJobs(response.totalJobs);
+      
+      // Update filters ref
+      filtersRef.current = {
+        keyword,
+        selectedProvince,
+        sidebarFilters: urlCategories ? { ...sidebarFilters, categories: [urlCategories] } : sidebarFilters,
+        sortBy
+      };
     } catch (err) {
       setError('Gagal memuat data pekerjaan. Silakan coba lagi.');
     } finally {
@@ -107,10 +179,14 @@ const JobSearchPage: React.FC = () => {
     }
   };
 
-  const handleAutoSearch = async () => {
-    if (searching) return; // Prevent multiple simultaneous searches
+  const handleFilterSearch = async () => {
+    if (searching) return;
     
     setSearching(true);
+    setJobs([]); // Clear existing jobs
+    setCurrentPage(1);
+    setHasMore(true);
+    
     try {
       setError(null);
       const filters = {
@@ -124,32 +200,13 @@ const JobSearchPage: React.FC = () => {
       const params = new URLSearchParams();
       if (keyword) params.set('search', keyword);
       if (selectedProvince) params.set('location', selectedProvince);
-      navigate(`/lowongan-kerja?${params.toString()}`, { replace: true });
+      navigate(`/lowongan-kerja/?${params.toString()}`, { replace: true });
       
-      const jobsData = await wpService.getJobs(filters);
-      setJobs(jobsData);
-    } catch (err) {
-      setError('Gagal memuat data pekerjaan. Silakan coba lagi.');
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const handleFilterSearch = async () => {
-    if (searching) return; // Prevent multiple simultaneous searches
-    
-    setSearching(true);
-    try {
-      setError(null);
-      const filters = {
-        search: keyword,
-        location: selectedProvince,
-        sortBy: sortBy,
-        ...sidebarFilters
-      };
-      
-      const jobsData = await wpService.getJobs(filters);
-      setJobs(jobsData);
+      const response = await wpService.getJobs(filters, 1, 24);
+      setJobs(response.jobs);
+      setCurrentPage(response.currentPage);
+      setHasMore(response.hasMore);
+      setTotalJobs(response.totalJobs);
     } catch (err) {
       setError('Gagal memuat data pekerjaan. Silakan coba lagi.');
     } finally {
@@ -158,7 +215,7 @@ const JobSearchPage: React.FC = () => {
   };
 
   const handleMainSearch = async () => {
-    await handleAutoSearch();
+    await handleFilterSearch();
   };
 
   const handleSidebarFilterChange = (newFilters: any) => {
@@ -170,7 +227,7 @@ const JobSearchPage: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    window.open(`/lowongan-kerja/${job.slug}`, '_blank');
+    window.open(`/lowongan-kerja/${job.slug}/`, '_blank');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -192,7 +249,7 @@ const JobSearchPage: React.FC = () => {
       categories: []
     });
     setSortBy('newest');
-    navigate('/lowongan-kerja', { replace: true });
+    navigate('/lowongan-kerja/', { replace: true });
   };
 
   const getActiveFiltersCount = () => {
@@ -228,6 +285,10 @@ const JobSearchPage: React.FC = () => {
     }));
   };
 
+  const breadcrumbItems = [
+    { label: 'Lowongan Kerja' }
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -241,6 +302,10 @@ const JobSearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Schema Markup */}
+      <SchemaMarkup schema={generateJobListingSchema(jobs)} />
+      <SchemaMarkup schema={generateBreadcrumbSchema(breadcrumbItems)} />
+
       {/* Header Search */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -379,7 +444,7 @@ const JobSearchPage: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  {searching ? 'Mencari...' : `${jobs.length} Lowongan Ditemukan`}
+                  {searching ? 'Mencari...' : `${totalJobs.toLocaleString()} Lowongan Ditemukan`}
                 </h1>
                 {keyword && (
                   <p className="text-gray-600">
@@ -420,13 +485,43 @@ const JobSearchPage: React.FC = () => {
                 ))}
               </div>
             ) : jobs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {jobs.map((job, index) => (
-                  <div key={job.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                    <JobCard job={job} onClick={handleJobClick} />
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {jobs.map((job, index) => (
+                    <div key={job.id} style={{ animationDelay: `${index * 0.05}s` }}>
+                      <JobCard job={job} onClick={handleJobClick} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Infinite Scroll Trigger */}
+                {hasMore && (
+                  <div 
+                    ref={setTarget}
+                    className="flex justify-center items-center py-8"
+                  >
+                    {loadingMore ? (
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
+                        <span className="text-gray-600">Memuat lowongan lainnya...</span>
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 text-sm">
+                        Scroll untuk memuat lebih banyak lowongan
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
+                )}
+
+                {/* End of Results */}
+                {!hasMore && jobs.length > 0 && (
+                  <div className="text-center py-8">
+                    <div className="text-gray-500 text-sm">
+                      Anda telah melihat semua {totalJobs.toLocaleString()} lowongan yang tersedia
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-16">
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

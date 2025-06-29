@@ -39,8 +39,8 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="font-semibold mb-4">Pencari Kerja</h3>
             <ul className="space-y-2">
-              <li><a href="/lowongan-kerja" className="text-gray-400 hover:text-white transition-colors">Cari Lowongan</a></li>
-              <li><a href="/artikel" className="text-gray-400 hover:text-white transition-colors">Tips Karir</a></li>
+              <li><a href="/lowongan-kerja/" className="text-gray-400 hover:text-white transition-colors">Cari Lowongan</a></li>
+              <li><a href="/artikel/" className="text-gray-400 hover:text-white transition-colors">Tips Karir</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Panduan Interview</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Panduan CV</a></li>
             </ul>
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="font-semibold mb-4">Sumber Daya</h3>
             <ul className="space-y-2">
-              <li><a href="/artikel" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+              <li><a href="/artikel/" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Panduan Gaji</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Tren Industri</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQ</a></li>

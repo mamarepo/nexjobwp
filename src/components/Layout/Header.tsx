@@ -36,7 +36,7 @@ const Header: React.FC = () => {
   }, []);
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname === path.replace(/\/$/, '');
   };
 
   return (
@@ -66,9 +66,9 @@ const Header: React.FC = () => {
               Beranda
             </Link>
             <Link 
-              to="/lowongan-kerja" 
+              to="/lowongan-kerja/" 
               className={`font-medium transition-colors ${
-                isActive('/lowongan-kerja') 
+                isActive('/lowongan-kerja/') 
                   ? 'text-primary-600' 
                   : 'text-gray-700 hover:text-primary-600'
               }`}
@@ -76,9 +76,9 @@ const Header: React.FC = () => {
               Cari Lowongan
             </Link>
             <Link 
-              to="/artikel" 
+              to="/artikel/" 
               className={`font-medium transition-colors ${
-                isActive('/artikel') 
+                isActive('/artikel/') 
                   ? 'text-primary-600' 
                   : 'text-gray-700 hover:text-primary-600'
               }`}
@@ -90,9 +90,9 @@ const Header: React.FC = () => {
           {/* CTA Buttons */}
           <div className="flex items-center space-x-4">
             <Link
-              to="/bookmark"
+              to="/bookmark/"
               className={`relative p-2 rounded-lg transition-colors ${
-                isActive('/bookmark')
+                isActive('/bookmark/')
                   ? 'text-primary-600 bg-primary-50'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
               }`}
@@ -106,7 +106,7 @@ const Header: React.FC = () => {
               )}
             </Link>
             <Link
-              to="/lowongan-kerja"
+              to="/lowongan-kerja/"
               className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
             >
               Cari Kerja

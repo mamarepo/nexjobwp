@@ -6,6 +6,8 @@ import { wpService } from '../services/wpService';
 import { bookmarkService } from '../services/bookmarkService';
 import JobCard from '../components/JobCard';
 import Breadcrumbs from '../components/Breadcrumbs';
+import SchemaMarkup from '../components/SEO/SchemaMarkup';
+import { generateBreadcrumbSchema } from '../utils/schemaUtils';
 
 const BookmarkPage: React.FC = () => {
   const [bookmarkedJobs, setBookmarkedJobs] = useState<Job[]>([]);
@@ -28,8 +30,8 @@ const BookmarkPage: React.FC = () => {
       }
 
       // Fetch all jobs and filter by bookmarked IDs
-      const allJobs = await wpService.getJobs();
-      const bookmarked = allJobs.filter(job => bookmarkIds.includes(job.id));
+      const allJobsResponse = await wpService.getJobs({}, 1, 100);
+      const bookmarked = allJobsResponse.jobs.filter(job => bookmarkIds.includes(job.id));
       setBookmarkedJobs(bookmarked);
     } catch (err) {
       setError('Gagal memuat lowongan yang disimpan. Silakan coba lagi.');
@@ -39,12 +41,7 @@ const BookmarkPage: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    window.open(`/job/${job.id}`, '_blank');
-  };
-
-  const handleBookmarkUpdate = () => {
-    // Reload bookmarked jobs when a bookmark is updated
-    loadBookmarkedJobs();
+    window.open(`/lowongan-kerja/${job.slug}/`, '_blank');
   };
 
   const breadcrumbItems = [
@@ -64,6 +61,9 @@ const BookmarkPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Schema Markup */}
+      <SchemaMarkup schema={generateBreadcrumbSchema(breadcrumbItems)} />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbItems} />
@@ -114,7 +114,7 @@ const BookmarkPage: React.FC = () => {
               Mulai simpan lowongan yang menarik untuk Anda dengan mengklik ikon bookmark
             </p>
             <Link
-              to="/lowongan-kerja"
+              to="/lowongan-kerja/"
               className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center"
             >
               Cari Lowongan

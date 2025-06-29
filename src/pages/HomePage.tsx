@@ -4,6 +4,8 @@ import { Search, TrendingUp, ArrowRight, Users, Building, Code, Heart, Calculato
 import { wpService, FilterData } from '../services/wpService';
 import { adminService } from '../services/adminService';
 import SearchableSelect from '../components/SearchableSelect';
+import SchemaMarkup from '../components/SEO/SchemaMarkup';
+import { generateWebsiteSchema, generateOrganizationSchema } from '../utils/schemaUtils';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -118,12 +120,12 @@ const HomePage: React.FC = () => {
     if (selectedLocation) params.set('location', selectedLocation);
     
     // Open in new tab
-    const url = `/lowongan-kerja?${params.toString()}`;
+    const url = `/lowongan-kerja/?${params.toString()}`;
     window.open(url, '_blank');
   };
 
   const handleCategoryClick = (category: string) => {
-    const url = `/lowongan-kerja?category=${encodeURIComponent(category)}`;
+    const url = `/lowongan-kerja/?category=${encodeURIComponent(category)}`;
     window.open(url, '_blank');
   };
 
@@ -134,7 +136,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleArticleClick = (articleSlug: string) => {
-    navigate(`/artikel/${articleSlug}`);
+    navigate(`/artikel/${articleSlug}/`);
   };
 
   const getProvinceOptions = () => {
@@ -147,6 +149,10 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Schema Markup */}
+      <SchemaMarkup schema={generateWebsiteSchema(settings)} />
+      <SchemaMarkup schema={generateOrganizationSchema()} />
+
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -308,7 +314,7 @@ const HomePage: React.FC = () => {
 
           <div className="text-center mt-12">
             <Link
-              to="/artikel"
+              to="/artikel/"
               className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-flex items-center"
             >
               Lihat Semua Artikel

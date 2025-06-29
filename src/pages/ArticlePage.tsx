@@ -2,16 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Loader2 } from 'lucide-react';
 import { wpService } from '../services/wpService';
+import { adminService } from '../services/adminService';
 import Breadcrumbs from '../components/Breadcrumbs';
+import SchemaMarkup from '../components/SEO/SchemaMarkup';
+import { generateArticleListingSchema, generateBreadcrumbSchema } from '../utils/schemaUtils';
 
 const ArticlePage: React.FC = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [settings] = useState(adminService.getSettings());
 
   useEffect(() => {
     loadArticles();
-  }, []);
+    
+    // Update document title and meta description
+    document.title = settings.articlesTitle;
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', settings.articlesDescription);
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = settings.articlesDescription;
+      document.head.appendChild(meta);
+    }
+  }, [settings]);
 
   const loadArticles = async () => {
     try {
@@ -50,6 +66,10 @@ const ArticlePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Schema Markup */}
+      <SchemaMarkup schema={generateArticleListingSchema(articles)} />
+      <SchemaMarkup schema={generateBreadcrumbSchema(breadcrumbItems)} />
+
       {/* Header */}
       <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -84,7 +104,7 @@ const ArticlePage: React.FC = () => {
             {articles.map((article, index) => (
               <Link
                 key={article.id}
-                to={`/artikel/${article.slug}`}
+                to={`/artikel/${article.slug}/`}
                 className="group"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >

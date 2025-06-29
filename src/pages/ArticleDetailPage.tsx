@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Loader2, AlertCircle, Tag, Folder } from 'lucide-react';
 import { wpService } from '../services/wpService';
 import Breadcrumbs from '../components/Breadcrumbs';
+import SchemaMarkup from '../components/SEO/SchemaMarkup';
+import { generateArticleSchema, generateBreadcrumbSchema, generateAuthorSchema } from '../utils/schemaUtils';
 
 const ArticleDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -68,7 +70,7 @@ const ArticleDetailPage: React.FC = () => {
   };
 
   const handleRelatedArticleClick = (articleSlug: string) => {
-    window.location.href = `/artikel/${articleSlug}`;
+    window.location.href = `/artikel/${articleSlug}/`;
   };
 
   if (loading) {
@@ -92,7 +94,7 @@ const ArticleDetailPage: React.FC = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Artikel Tidak Ditemukan</h2>
           <p className="text-gray-600 mb-6">{error || 'Artikel yang Anda cari tidak tersedia'}</p>
           <Link 
-            to="/artikel"
+            to="/artikel/"
             className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
           >
             Kembali ke Artikel
@@ -103,12 +105,19 @@ const ArticleDetailPage: React.FC = () => {
   }
 
   const breadcrumbItems = [
-    { label: 'Tips Karir', href: '/artikel' },
+    { label: 'Tips Karir', href: '/artikel/' },
     { label: article.title.rendered }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Schema Markup */}
+      <SchemaMarkup schema={generateArticleSchema(article)} />
+      <SchemaMarkup schema={generateBreadcrumbSchema(breadcrumbItems)} />
+      {article.author_info && (
+        <SchemaMarkup schema={generateAuthorSchema(article.author_info)} />
+      )}
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbItems} />
@@ -156,6 +165,15 @@ const ArticleDetailPage: React.FC = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
               {article.title.rendered}
             </h1>
+            
+            {/* Article Description */}
+            {article.seo_description && (
+              <div className="bg-gray-50 border-l-4 border-primary-500 p-4 mb-6">
+                <p className="text-gray-700 text-lg leading-relaxed">
+                  {article.seo_description}
+                </p>
+              </div>
+            )}
             
             {/* Tags */}
             {article.tags_info && article.tags_info.length > 0 && (
