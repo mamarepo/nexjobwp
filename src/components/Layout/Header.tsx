@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bookmark } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { bookmarkService } from '../../services/bookmarkService';
+import { bookmarkService } from '@/../../services/bookmarkService';
 
 const Header: React.FC = () => {
   const location = useLocation();

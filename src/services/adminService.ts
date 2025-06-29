@@ -1,4 +1,4 @@
-import { AdminSettings } from '../types/job';
+import { AdminSettings } from '@/../types/job';
 
 class AdminService {
   private storageKey = 'nexjob_admin_settings';

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Loader2, AlertCircle, Tag, Folder } from 'lucide-react';
-import { wpService } from '../services/wpService';
-import Breadcrumbs from '../components/Breadcrumbs';
-import SchemaMarkup from '../components/SEO/SchemaMarkup';
-import { generateArticleSchema, generateBreadcrumbSchema, generateAuthorSchema } from '../utils/schemaUtils';
+import { wpService } from '@/../services/wpService';
+import Breadcrumbs from '@/../components/Breadcrumbs';
+import SchemaMarkup from '@/../components/SEO/SchemaMarkup';
+import { generateArticleSchema, generateBreadcrumbSchema, generateAuthorSchema } from '@/../utils/schemaUtils';
 
 const ArticleDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();

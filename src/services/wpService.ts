@@ -1,4 +1,4 @@
-import { Job } from '../types/job';
+import { Job } from '@/../types/job';
 
 interface FilterData {
   nexjob_lokasi_provinsi: Record<string, string[]>;

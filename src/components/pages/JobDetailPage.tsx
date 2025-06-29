@@ -15,13 +15,13 @@ import {
   CalendarDays,
   Badge
 } from 'lucide-react';
-import { Job } from '../types/job';
-import { wpService } from '../services/wpService';
-import { bookmarkService } from '../services/bookmarkService';
-import Breadcrumbs from '../components/Breadcrumbs';
-import JobCard from '../components/JobCard';
-import SchemaMarkup from '../components/SEO/SchemaMarkup';
-import { generateJobPostingSchema, generateBreadcrumbSchema } from '../utils/schemaUtils';
+import { Job } from '@/../types/job';
+import { wpService } from '@/../services/wpService';
+import { bookmarkService } from '@/../services/bookmarkService';
+import Breadcrumbs from '@/../components/Breadcrumbs';
+import JobCard from '@/../components/JobCard';
+import SchemaMarkup from '@/../components/SEO/SchemaMarkup';
+import { generateJobPostingSchema, generateBreadcrumbSchema } from '@/../utils/schemaUtils';
 
 const JobDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();

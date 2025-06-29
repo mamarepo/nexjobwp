@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Search, TrendingUp, ArrowRight, Users, Building, Code, Heart, Calculator, Truck } from 'lucide-react';
-import { wpService, FilterData } from '../services/wpService';
-import { adminService } from '../services/adminService';
-import SearchableSelect from '../components/SearchableSelect';
-import SchemaMarkup from '../components/SEO/SchemaMarkup';
-import { generateWebsiteSchema, generateOrganizationSchema } from '../utils/schemaUtils';
+import { wpService, FilterData } from '@/../services/wpService';
+import { adminService } from '@/../services/adminService';
+import SearchableSelect from '@/../components/SearchableSelect';
+import SchemaMarkup from '@/../components/SEO/SchemaMarkup';
+import { generateWebsiteSchema, generateOrganizationSchema } from '@/../utils/schemaUtils';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ensureTrailingSlash } from '../utils/urlUtils';
+import { ensureTrailingSlash } from '@/../utils/urlUtils';
 
 const TrailingSlashRedirect: React.FC = () => {
   const location = useLocation();

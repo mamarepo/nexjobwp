@@ -1,5 +1,5 @@
-import { Job } from '../types/job';
-import { AdminSettings } from '../types/job';
+import { Job } from '@/../types/job';
+import { AdminSettings } from '@/../types/job';
 
 export const generateWebsiteSchema = (settings: AdminSettings) => {
   return {
