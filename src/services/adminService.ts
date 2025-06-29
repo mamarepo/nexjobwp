@@ -1,4 +1,4 @@
-import { AdminSettings } from '@/../types/job';
+import { AdminSettings } from '@/types/job';
 
 class AdminService {
   private storageKey = 'nexjob_admin_settings';
@@ -20,13 +20,17 @@ class AdminService {
 
   getSettings(): AdminSettings {
     try {
+      if (typeof window === 'undefined') {
+        return this.defaultSettings;
+      }
+      
       const settings = localStorage.getItem(this.storageKey);
       const savedSettings = settings ? JSON.parse(settings) : {};
       const mergedSettings = { ...this.defaultSettings, ...savedSettings };
       
       // Apply settings to wpService when loaded
       if (typeof window !== 'undefined') {
-        import('../services/wpService').then(({ wpService }) => {
+        import('@/services/wpService').then(({ wpService }) => {
           wpService.setBaseUrl(mergedSettings.apiUrl);
           wpService.setFiltersApiUrl(mergedSettings.filtersApiUrl);
           wpService.setAuthToken(mergedSettings.authToken);
@@ -42,11 +46,13 @@ class AdminService {
 
   saveSettings(settings: AdminSettings): void {
     try {
+      if (typeof window === 'undefined') return;
+      
       localStorage.setItem(this.storageKey, JSON.stringify(settings));
       
       // Apply settings to wpService immediately
       if (typeof window !== 'undefined') {
-        import('../services/wpService').then(({ wpService }) => {
+        import('@/services/wpService').then(({ wpService }) => {
           wpService.setBaseUrl(settings.apiUrl);
           wpService.setFiltersApiUrl(settings.filtersApiUrl);
           wpService.setAuthToken(settings.authToken);
@@ -59,6 +65,8 @@ class AdminService {
 
   isAuthenticated(): boolean {
     try {
+      if (typeof window === 'undefined') return false;
+      
       const auth = localStorage.getItem(this.authKey);
       if (!auth) return false;
       
@@ -73,6 +81,8 @@ class AdminService {
   }
 
   authenticate(email: string, password: string): boolean {
+    if (typeof window === 'undefined') return false;
+    
     // Hash check for aldodkris@gmail.com and Aldo123!
     const validEmail = 'aldodkris@gmail.com';
     const validPasswordHash = this.hashPassword('Aldo123!');
@@ -90,6 +100,7 @@ class AdminService {
   }
 
   logout(): void {
+    if (typeof window === 'undefined') return;
     localStorage.removeItem(this.authKey);
   }
 

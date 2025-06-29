@@ -1,40 +1,44 @@
-import { Job } from '@/../types/job';
-import { AdminSettings } from '@/../types/job';
+import { Job } from '@/types/job';
+import { AdminSettings } from '@/types/job';
 
 export const generateWebsiteSchema = (settings: AdminSettings) => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
+  
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": settings.siteTitle,
     "description": settings.siteDescription,
-    "url": window.location.origin,
+    "url": baseUrl,
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": `${window.location.origin}/lowongan-kerja/?search={search_term_string}`
+        "urlTemplate": `${baseUrl}/lowongan-kerja/?search={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
     "publisher": {
       "@type": "Organization",
       "name": "Nexjob",
-      "url": window.location.origin,
+      "url": baseUrl,
       "logo": {
         "@type": "ImageObject",
-        "url": `${window.location.origin}/logo.png`
+        "url": `${baseUrl}/logo.png`
       }
     }
   };
 };
 
 export const generateOrganizationSchema = () => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
+  
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Nexjob",
-    "url": window.location.origin,
-    "logo": `${window.location.origin}/logo.png`,
+    "url": baseUrl,
+    "logo": `${baseUrl}/logo.png`,
     "description": "Platform pencarian kerja terpercaya di Indonesia dengan ribuan lowongan dari perusahaan terbaik",
     "foundingDate": "2024",
     "contactPoint": {
@@ -85,7 +89,7 @@ const extractSalaryInfo = (gaji: string) => {
 };
 
 export const generateJobPostingSchema = (job: Job) => {
-  const baseUrl = window.location.origin;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
   
   // Calculate valid through date (30 days from posting date)
   const postedDate = new Date(job.created_at || Date.now());
@@ -132,7 +136,7 @@ export const generateJobPostingSchema = (job: Job) => {
 };
 
 export const generateBreadcrumbSchema = (items: Array<{ label: string; href?: string }>) => {
-  const baseUrl = window.location.origin;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
   
   const itemListElement = items.map((item, index) => ({
     "@type": "ListItem",
@@ -157,7 +161,7 @@ export const generateBreadcrumbSchema = (items: Array<{ label: string; href?: st
 };
 
 export const generateArticleSchema = (article: any) => {
-  const baseUrl = window.location.origin;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
   
   return {
     "@context": "https://schema.org",
@@ -190,7 +194,7 @@ export const generateArticleSchema = (article: any) => {
 };
 
 export const generateJobListingSchema = (jobs: Job[]) => {
-  const baseUrl = window.location.origin;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
   
   return {
     "@context": "https://schema.org",
@@ -229,7 +233,7 @@ export const generateJobListingSchema = (jobs: Job[]) => {
 };
 
 export const generateArticleListingSchema = (articles: any[]) => {
-  const baseUrl = window.location.origin;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
   
   return {
     "@context": "https://schema.org",
@@ -257,7 +261,7 @@ export const generateArticleListingSchema = (articles: any[]) => {
 };
 
 export const generateAuthorSchema = (author: any) => {
-  const baseUrl = window.location.origin;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nexjob.tech';
   
   return {
     "@context": "https://schema.org",

@@ -1,4 +1,4 @@
-import { Job } from '@/../types/job';
+import { Job } from '@/types/job';
 
 interface FilterData {
   nexjob_lokasi_provinsi: Record<string, string[]>;
@@ -48,12 +48,27 @@ class WordPressService {
   }
 
   private decodeHtmlEntities(text: string): string {
+    if (typeof document === 'undefined') {
+      // Server-side fallback
+      return text
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    }
+    
     const textarea = document.createElement('textarea');
     textarea.innerHTML = text;
     return textarea.value;
   }
 
   private stripHtmlTags(html: string): string {
+    if (typeof document === 'undefined') {
+      // Server-side fallback
+      return html.replace(/<[^>]*>/g, '');
+    }
+    
     const div = document.createElement('div');
     div.innerHTML = html;
     return div.textContent || div.innerText || '';

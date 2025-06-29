@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Clock, GraduationCap, Building, Users, Filter, MapPin, ChevronDown, ChevronUp, Star, Zap } from 'lucide-react';
-import { wpService, FilterData } from '@/../services/wpService';
+import { wpService, FilterData } from '@/services/wpService';
 
 interface JobSidebarProps {
   filters: {

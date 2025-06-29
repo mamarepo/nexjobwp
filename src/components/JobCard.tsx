@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin, Clock, Briefcase, GraduationCap, ExternalLink, Building, Bookmark } from 'lucide-react';
-import { Job } from '@/../types/job';
-import { bookmarkService } from '@/../services/bookmarkService';
+import { Job } from '@/types/job';
+import { bookmarkService } from '@/services/bookmarkService';
 
 interface JobCardProps {
   job: Job;
