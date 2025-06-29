@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { Search, Filter, X, Loader2, AlertCircle } from 'lucide-react';
 import { Job } from '@/types/job';
 import { wpService, FilterData, JobsResponse } from '@/services/wpService';
@@ -12,8 +12,7 @@ import { generateJobListingSchema, generateBreadcrumbSchema } from '@/utils/sche
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 const JobSearchPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -26,8 +25,8 @@ const JobSearchPage: React.FC = () => {
   const [totalJobs, setTotalJobs] = useState(0);
   
   // Main search filters
-  const [keyword, setKeyword] = useState(searchParams.get('search') || '');
-  const [selectedProvince, setSelectedProvince] = useState(searchParams.get('location') || '');
+  const [keyword, setKeyword] = useState((router.query.search as string) || '');
+  const [selectedProvince, setSelectedProvince] = useState((router.query.location as string) || '');
   
   // Sidebar filters - now using arrays for multiple selections
   const [sidebarFilters, setSidebarFilters] = useState({
@@ -143,7 +142,7 @@ const JobSearchPage: React.FC = () => {
       setFilterData(filters);
       
       // Parse URL parameters for initial filters
-      const urlCategories = searchParams.get('category');
+      const urlCategories = router.query.category as string;
       if (urlCategories) {
         setSidebarFilters(prev => ({
           ...prev,
@@ -200,7 +199,7 @@ const JobSearchPage: React.FC = () => {
       const params = new URLSearchParams();
       if (keyword) params.set('search', keyword);
       if (selectedProvince) params.set('location', selectedProvince);
-      navigate(`/lowongan-kerja/?${params.toString()}`, { replace: true });
+      router.replace(`/jobs/?${params.toString()}`, undefined, { shallow: true });
       
       const response = await wpService.getJobs(filters, 1, 24);
       setJobs(response.jobs);
@@ -227,7 +226,7 @@ const JobSearchPage: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    window.open(`/lowongan-kerja/${job.slug}/`, '_blank');
+    window.open(`/jobs/${job.slug}/`, '_blank');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -249,7 +248,7 @@ const JobSearchPage: React.FC = () => {
       categories: []
     });
     setSortBy('newest');
-    navigate('/lowongan-kerja/', { replace: true });
+    router.replace('/jobs/', undefined, { shallow: true });
   };
 
   const getActiveFiltersCount = () => {

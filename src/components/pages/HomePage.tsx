@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { Search, TrendingUp, ArrowRight, Users, Building, Code, Heart, Calculator, Truck } from 'lucide-react';
 import { wpService, FilterData } from '@/services/wpService';
 import { adminService } from '@/services/adminService';
@@ -8,7 +9,7 @@ import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateWebsiteSchema, generateOrganizationSchema } from '@/utils/schemaUtils';
 
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [articles, setArticles] = useState<any[]>([]);
@@ -120,12 +121,12 @@ const HomePage: React.FC = () => {
     if (selectedLocation) params.set('location', selectedLocation);
     
     // Open in new tab
-    const url = `/lowongan-kerja/?${params.toString()}`;
+    const url = `/jobs/?${params.toString()}`;
     window.open(url, '_blank');
   };
 
   const handleCategoryClick = (category: string) => {
-    const url = `/lowongan-kerja/?category=${encodeURIComponent(category)}`;
+    const url = `/jobs/?category=${encodeURIComponent(category)}`;
     window.open(url, '_blank');
   };
 
@@ -136,7 +137,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleArticleClick = (articleSlug: string) => {
-    navigate(`/artikel/${articleSlug}/`);
+    router.push(`/articles/${articleSlug}/`);
   };
 
   const getProvinceOptions = () => {
@@ -314,7 +315,7 @@ const HomePage: React.FC = () => {
 
           <div className="text-center mt-12">
             <Link
-              to="/artikel/"
+              href="/articles/"
               className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-flex items-center"
             >
               Lihat Semua Artikel

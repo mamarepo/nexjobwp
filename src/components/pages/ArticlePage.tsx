@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Calendar, User, ArrowRight, Loader2 } from 'lucide-react';
 import { wpService } from '@/services/wpService';
 import { adminService } from '@/services/adminService';
@@ -104,7 +104,7 @@ const ArticlePage: React.FC = () => {
             {articles.map((article, index) => (
               <Link
                 key={article.id}
-                to={`/artikel/${article.slug}/`}
+                href={`/articles/${article.slug}/`}
                 className="group"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Bookmark, AlertCircle, Loader2 } from 'lucide-react';
 import { Job } from '@/types/job';
 import { wpService } from '@/services/wpService';
@@ -41,7 +41,7 @@ const BookmarkPage: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    window.open(`/lowongan-kerja/${job.slug}/`, '_blank');
+    window.open(`/jobs/${job.slug}/`, '_blank');
   };
 
   const breadcrumbItems = [
@@ -114,7 +114,7 @@ const BookmarkPage: React.FC = () => {
               Mulai simpan lowongan yang menarik untuk Anda dengan mengklik ikon bookmark
             </p>
             <Link
-              to="/lowongan-kerja/"
+              href="/jobs/"
               className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center"
             >
               Cari Lowongan

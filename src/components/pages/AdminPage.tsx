@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { Settings, TestTube, Save, LogOut, Eye, EyeOff, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import { wpService } from '@/services/wpService';
 import { AdminSettings } from '@/types/job';
 
 const AdminPage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -49,7 +49,7 @@ const AdminPage: React.FC = () => {
     adminService.logout();
     setIsAuthenticated(false);
     setShowLogin(true);
-    navigate('/');
+    router.push('/');
   };
 
   const handleSettingsChange = (field: keyof AdminSettings, value: string) => {

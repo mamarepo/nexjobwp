@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { Calendar, User, ArrowRight, Loader2, AlertCircle, Tag, Folder } from 'lucide-react';
 import { wpService } from '@/services/wpService';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -7,7 +8,8 @@ import SchemaMarkup from '@/components/SEO/SchemaMarkup';
 import { generateArticleSchema, generateBreadcrumbSchema, generateAuthorSchema } from '@/utils/schemaUtils';
 
 const ArticleDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const router = useRouter();
+  const { slug } = router.query;
   const [article, setArticle] = useState<any>(null);
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ const ArticleDetailPage: React.FC = () => {
 
   useEffect(() => {
     const loadArticle = async () => {
-      if (!slug) return;
+      if (!slug || typeof slug !== 'string') return;
       
       try {
         const articleData = await wpService.getArticleBySlug(slug);
@@ -70,7 +72,7 @@ const ArticleDetailPage: React.FC = () => {
   };
 
   const handleRelatedArticleClick = (articleSlug: string) => {
-    window.location.href = `/artikel/${articleSlug}/`;
+    router.push(`/articles/${articleSlug}/`);
   };
 
   if (loading) {
@@ -94,7 +96,7 @@ const ArticleDetailPage: React.FC = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Artikel Tidak Ditemukan</h2>
           <p className="text-gray-600 mb-6">{error || 'Artikel yang Anda cari tidak tersedia'}</p>
           <Link 
-            to="/artikel/"
+            href="/articles/"
             className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
           >
             Kembali ke Artikel
@@ -105,7 +107,7 @@ const ArticleDetailPage: React.FC = () => {
   }
 
   const breadcrumbItems = [
-    { label: 'Tips Karir', href: '/artikel/' },
+    { label: 'Tips Karir', href: '/articles/' },
     { label: article.title.rendered }
   ];
 
