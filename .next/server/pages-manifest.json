@@ -4,5 +4,6 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/lowongan-kerja": "pages/lowongan-kerja.js",
-  "/artikel": "pages/artikel.js"
+  "/artikel": "pages/artikel.js",
+  "/artikel/[slug]": "pages/artikel/[slug].js"
 }
