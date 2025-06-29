@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bookmark } from 'lucide-react';
-import { Link, useRouter } from 'next/router';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { bookmarkService } from '@/services/bookmarkService';
 
 const Header: React.FC = () => {
