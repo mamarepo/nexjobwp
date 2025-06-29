@@ -12,10 +12,6 @@ const nextConfig = {
         source: '/bookmark/',
         destination: '/bookmarks',
       },
-      {
-        source: '/admin/',
-        destination: '/admin',
-      },
     ];
   },
   async redirects() {
@@ -63,11 +59,6 @@ const nextConfig = {
       {
         source: '/bookmark',
         destination: '/bookmark/',
-        permanent: true,
-      },
-      {
-        source: '/admin',
-        destination: '/admin/',
         permanent: true,
       },
     ];

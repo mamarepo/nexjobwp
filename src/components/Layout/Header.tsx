@@ -91,9 +91,9 @@ const Header: React.FC = () => {
           {/* CTA Buttons */}
           <div className="flex items-center space-x-4">
             <Link
-              href="/bookmarks"
+              href="/bookmarks/"
               className={`relative p-2 rounded-lg transition-colors ${
-                isActive('/bookmarks') || isActive('/bookmark')
+                isActive('/bookmarks/') || isActive('/bookmarks') || router.pathname.startsWith('/bookmarks')
                   ? 'text-primary-600 bg-primary-50'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
               }`}

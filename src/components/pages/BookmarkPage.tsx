@@ -41,7 +41,7 @@ const BookmarkPage: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    window.open(`/jobs/${job.slug}/`, '_blank');
+    window.open(`/lowongan-kerja/${job.slug}/`, '_blank');
   };
 
   const breadcrumbItems = [
@@ -114,7 +114,7 @@ const BookmarkPage: React.FC = () => {
               Mulai simpan lowongan yang menarik untuk Anda dengan mengklik ikon bookmark
             </p>
             <Link
-              href="/jobs/"
+              href="/lowongan-kerja/"
               className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center"
             >
               Cari Lowongan
