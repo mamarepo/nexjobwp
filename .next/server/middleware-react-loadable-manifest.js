@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST="{\"pages/_app.tsx -> @/services/wpService\":{\"id\":\"pages/_app.tsx -> @/services/wpService\",\"files\":[\"static/chunks/src_services_wpService_ts.js\"]}}"
