@@ -101,13 +101,23 @@ const HomePage: React.FC = () => {
 
   const loadInitialData = async () => {
     try {
-      // Load filter data for provinces
-      const filters = await wpService.getFiltersData();
-      setFilterData(filters);
+      // Load filter data for provinces with error handling
+      try {
+        const filters = await wpService.getFiltersData();
+        setFilterData(filters);
+      } catch (error) {
+        console.warn('Failed to load filter data, using fallback:', error);
+        // Filter data will use fallback from wpService
+      }
       
-      // Load articles
-      const articlesData = await wpService.getArticles(3);
-      setArticles(articlesData);
+      // Load articles with error handling
+      try {
+        const articlesData = await wpService.getArticles(3);
+        setArticles(articlesData);
+      } catch (error) {
+        console.warn('Failed to load articles, using fallback:', error);
+        // Articles will use fallback from wpService
+      }
     } catch (error) {
       console.error('Failed to load initial data:', error);
     } finally {

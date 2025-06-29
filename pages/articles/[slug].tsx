@@ -128,13 +128,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     return {
       paths,
-      fallback: 'blocking', // Generate pages on-demand for other articles
+      fallback: false, // Changed from 'blocking' to false for static export compatibility
     };
   } catch (error) {
     console.error('Error in getStaticPaths:', error);
     return {
       paths: [],
-      fallback: 'blocking',
+      fallback: false, // Changed from 'blocking' to false for static export compatibility
     };
   }
 };

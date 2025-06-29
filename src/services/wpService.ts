@@ -51,10 +51,10 @@ class WordPressService {
     if (typeof document === 'undefined') {
       // Server-side fallback
       return text
-        .replace(/&/g, '&')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
     }
     
@@ -88,16 +88,30 @@ class WordPressService {
     return '';
   }
 
-  async getFiltersData(): Promise<FilterData> {
+  private async fetchWithFallback(url: string, options: RequestInit = {}): Promise<Response> {
     try {
-      const response = await fetch(this.filtersApiUrl, {
-        headers: this.getHeaders()
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...this.getHeaders(),
+          ...options.headers
+        }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch filters data');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+      
+      return response;
+    } catch (error) {
+      console.warn(`Failed to fetch from ${url}:`, error);
+      throw error;
+    }
+  }
 
+  async getFiltersData(): Promise<FilterData> {
+    try {
+      const response = await this.fetchWithFallback(this.filtersApiUrl);
       const data = await response.json();
       
       // Decode HTML entities in filter data
@@ -209,14 +223,7 @@ class WordPressService {
 
   async testConnection(): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/lowongan-kerja?per_page=1`, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
+      const response = await this.fetchWithFallback(`${this.baseUrl}/lowongan-kerja?per_page=1`);
       const data = await response.json();
       return { success: true, data: data[0] || null };
     } catch (error) {
@@ -229,14 +236,7 @@ class WordPressService {
 
   async testFiltersConnection(): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
-      const response = await fetch(this.filtersApiUrl, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
+      const response = await this.fetchWithFallback(this.filtersApiUrl);
       const data = await response.json();
       return { success: true, data: data };
     } catch (error) {
@@ -256,14 +256,7 @@ class WordPressService {
         url += `&search=${encodeURIComponent(filters.search)}`;
       }
 
-      const response = await fetch(url, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch jobs');
-      }
-
+      const response = await this.fetchWithFallback(url);
       const wpJobs = await response.json();
       
       // Get total pages from headers
@@ -343,15 +336,9 @@ class WordPressService {
 
   async getJobBySlug(slug: string): Promise<Job | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/lowongan-kerja?slug=${slug}&_embed`, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error('Job not found');
-      }
-
+      const response = await this.fetchWithFallback(`${this.baseUrl}/lowongan-kerja?slug=${slug}&_embed`);
       const wpJobs = await response.json();
+      
       if (!wpJobs || wpJobs.length === 0) {
         return null;
       }
@@ -392,14 +379,7 @@ class WordPressService {
 
   async getJobById(id: string): Promise<Job | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/lowongan-kerja/${id}?_embed`, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error('Job not found');
-      }
-
+      const response = await this.fetchWithFallback(`${this.baseUrl}/lowongan-kerja/${id}?_embed`);
       const wpJob = await response.json();
       const meta = wpJob.meta || {};
 
@@ -453,14 +433,7 @@ class WordPressService {
         url += `&per_page=${limit}`;
       }
 
-      const response = await fetch(url, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch articles');
-      }
-
+      const response = await this.fetchWithFallback(url);
       const articles = await response.json();
       
       // Add featured image URL and author info if available
@@ -489,21 +462,15 @@ class WordPressService {
       }));
     } catch (error) {
       console.error('Error fetching articles:', error);
-      return [];
+      return this.getMockArticles();
     }
   }
 
   async getArticleBySlug(slug: string): Promise<any | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/posts?slug=${slug}&_embed`, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error('Article not found');
-      }
-
+      const response = await this.fetchWithFallback(`${this.baseUrl}/posts?slug=${slug}&_embed`);
       const articles = await response.json();
+      
       if (!articles || articles.length === 0) {
         return null;
       }
@@ -540,15 +507,9 @@ class WordPressService {
 
   async getArticleById(id: string): Promise<any | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/posts/${id}?_embed`, {
-        headers: this.getHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error('Article not found');
-      }
-
+      const response = await this.fetchWithFallback(`${this.baseUrl}/posts/${id}?_embed`);
       const article = await response.json();
+      
       return {
         ...article,
         title: {
@@ -712,6 +673,39 @@ class WordPressService {
     ];
 
     return this.filterJobs(mockJobs, filters);
+  }
+
+  private getMockArticles(): any[] {
+    return [
+      {
+        id: 1,
+        slug: 'tips-interview-kerja',
+        title: {
+          rendered: 'Tips Sukses Interview Kerja'
+        },
+        excerpt: {
+          rendered: 'Panduan lengkap untuk mempersiapkan diri menghadapi interview kerja dan meningkatkan peluang diterima.'
+        },
+        content: {
+          rendered: '<p>Artikel lengkap tentang tips interview kerja...</p>'
+        },
+        date: new Date().toISOString(),
+        featured_media_url: 'https://images.pexels.com/photos/5668858/pexels-photo-5668858.jpeg',
+        author_info: {
+          name: 'Admin Nexjob',
+          display_name: 'Admin Nexjob'
+        },
+        categories_info: [
+          { name: 'Tips Karir' }
+        ],
+        tags_info: [
+          { name: 'Interview' },
+          { name: 'Karir' }
+        ],
+        seo_title: 'Tips Sukses Interview Kerja',
+        seo_description: 'Panduan lengkap untuk mempersiapkan diri menghadapi interview kerja dan meningkatkan peluang diterima.'
+      }
+    ];
   }
 }
 
