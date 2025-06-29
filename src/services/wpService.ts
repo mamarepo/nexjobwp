@@ -51,10 +51,10 @@ class WordPressService {
     if (typeof document === 'undefined') {
       // Server-side fallback
       return text
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
         .replace(/&#39;/g, "'");
     }
     
@@ -715,5 +715,7 @@ class WordPressService {
   }
 }
 
+// Export both the class and a singleton instance
+export { WordPressService };
 export const wpService = new WordPressService();
 export type { FilterData, JobsResponse };
